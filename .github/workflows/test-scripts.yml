@@ -14,7 +14,7 @@ jobs:
     name: Annotation commands
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Write the annotations and compare with the golden file
         shell: bash
@@ -37,7 +37,7 @@ jobs:
     name: SARIF merging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Merge the reports and compare with the golden files
         shell: bash
@@ -63,7 +63,7 @@ jobs:
     name: Scan.toml editing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Compare with the golden files
         shell: bash

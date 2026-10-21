@@ -11,7 +11,7 @@ jobs:
     name: One path with several packages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -41,7 +41,7 @@ jobs:
     name: Several paths with a package excluded
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -78,7 +78,7 @@ jobs:
     name: Ballerina workspace
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
