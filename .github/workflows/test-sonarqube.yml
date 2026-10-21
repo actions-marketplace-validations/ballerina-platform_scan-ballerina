@@ -16,7 +16,7 @@ jobs:
     name: SonarQube settings that fail
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Absolute plugin path in Scan.toml
         id: absolute-plugin
@@ -267,7 +267,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # Serves the platform plugin at the URL in test/sonarqube/remote-plugin/Scan.toml, with a
       # self-signed certificate that the runner trusts.
@@ -357,7 +357,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -418,7 +418,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # Only host-url and token are given, so the key and name come from the properties file,
       # and the plugin is the pinned version.
@@ -496,7 +496,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # test/projects/multi holds two packages, and exclude-paths leaves one, so the platform-level
       # key applies to it. Its item sets only project-name, which does not conflict with the key.

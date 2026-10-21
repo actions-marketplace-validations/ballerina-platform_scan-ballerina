@@ -12,7 +12,7 @@ jobs:
     name: Latest Ballerina and scan tool versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -39,7 +39,7 @@ jobs:
     name: Compatible Ballerina and scan tool versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -94,7 +94,7 @@ jobs:
     name: Ballerina and scan tool version selection
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # Versions below the minimums are rejected before Ballerina or the scan tool is installed.
       - name: Scan tool version below the minimum
@@ -221,7 +221,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
