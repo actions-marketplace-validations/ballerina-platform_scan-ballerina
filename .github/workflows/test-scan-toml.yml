@@ -17,7 +17,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Record the Scan.toml files
         shell: bash
@@ -97,7 +97,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Serve Scan.toml and the plugin over https
         shell: bash
@@ -200,7 +200,7 @@ jobs:
     name: Scan.toml settings that fail
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan-config
@@ -234,7 +234,7 @@ jobs:
     name: Files restored after an interrupted run
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Leave a changed Scan.toml and Ballerina.toml behind
         shell: bash
