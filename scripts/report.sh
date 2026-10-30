@@ -47,6 +47,11 @@ if [ -n "${ARTIFACT_ID:-}" ]; then
 fi
 set_output uploads "$UPLOADS"
 
+GCS_SKIP_REASON="code scanning rejects a token that cannot write security events outside pull_request runs. See the upload step log for the error."
+if [ "${GCS_SKIPPED:-false}" = "true" ]; then
+  log_warning "The upload to GitHub code scanning failed and was skipped: $GCS_SKIP_REASON The SARIF file is kept as the sarif-file output; save it with artifacts: true and upload it from a trusted workflow_run workflow."
+fi
+
 # Packages whose SonarQube scan failed. The SARIF file was still produced and sent to the other
 # platforms, so the step fails here, at the end.
 SONAR_FAILURES=()
@@ -176,10 +181,10 @@ if [ "$(trim "${JOB_SUMMARY:-true}")" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:
       echo
     fi
     if [ "${GCS_SKIPPED:-false}" = "true" ]; then
-      echo "- The upload to GitHub code scanning was skipped: pull requests from forks and Dependabot runs get a read-only \`GITHUB_TOKEN\`. The SARIF file is kept as the \`sarif-file\` output, and \`artifacts: true\` saves it as an artifact."
+      echo "- The upload to GitHub code scanning failed and was skipped: $GCS_SKIP_REASON The SARIF file is kept as the \`sarif-file\` output, and \`artifacts: true\` saves it as an artifact."
     fi
     if [ "${SONARQUBE_SKIPPED:-false}" = "true" ]; then
-      echo "- SonarQube was skipped: secrets are not available to pull requests from forks or to Dependabot runs."
+      echo "- SonarQube was skipped: pull requests from forks get no secrets and Dependabot runs get only Dependabot secrets."
     fi
     echo
   } >> "$GITHUB_STEP_SUMMARY"
