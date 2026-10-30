@@ -12,7 +12,7 @@ jobs:
     name: Latest Ballerina and scan tool versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -39,7 +39,7 @@ jobs:
     name: Compatible Ballerina and scan tool versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -95,7 +95,7 @@ jobs:
     name: Oldest Ballerina and scan tool versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
@@ -159,7 +159,7 @@ jobs:
     name: Ballerina and scan tool version selection
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # Versions below the minimums, and a Ballerina older than the given scan tool needs, are
       # rejected before Ballerina or the scan tool is installed.
@@ -330,7 +330,7 @@ jobs:
     name: Empty versions with Ballerina 2201.12 on the path
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Set up an old Ballerina
         uses: ballerina-platform/setup-ballerina@585120e3f0e540bf127376ee6e75d39e8ce6aaa4 # v1.1.5
@@ -363,7 +363,7 @@ jobs:
     name: Ballerina and scan tool versions set to latest
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Set up an older Ballerina
         uses: ballerina-platform/setup-ballerina@585120e3f0e540bf127376ee6e75d39e8ce6aaa4 # v1.1.5
@@ -403,7 +403,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan
         id: scan
