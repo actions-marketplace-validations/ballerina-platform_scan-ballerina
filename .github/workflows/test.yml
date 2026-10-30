@@ -69,7 +69,7 @@ jobs:
       actions: read
       checks: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check the annotations of the Annotations job
         shell: bash
