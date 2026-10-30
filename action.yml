@@ -224,6 +224,9 @@ runs:
     - name: Upload to GitHub code scanning
       id: upload
       if: steps.validate.outputs.github-code-scanning == 'true' && steps.merge.outputs.sarif-file != ''
+      # Code scanning accepts a read-only token only from pull_request runs, so a failed upload in a
+      # restricted run on another event is reported as skipped.
+      continue-on-error: ${{ steps.validate.outputs.restricted == 'true' && github.event_name != 'pull_request' }}
       uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
       with:
         sarif_file: ${{ steps.merge.outputs.sarif-file }}
@@ -263,7 +266,7 @@ runs:
             (steps.sonarqube-tools.outcome == 'failure' && 'install SonarScanner and the platform plugin') ||
             (steps.scan.outcome == 'failure' && 'scan the packages') ||
             (steps.merge.outcome == 'failure' && 'merge the SARIF reports') ||
-            (steps.upload.outcome == 'failure' && 'upload to GitHub code scanning') ||
+            (steps.upload.conclusion == 'failure' && 'upload to GitHub code scanning') ||
             (steps.artifact.outcome == 'failure' && 'save the SARIF file as an artifact') ||
             ''
           }}
@@ -277,6 +280,6 @@ runs:
         ARTIFACT_NAME: ${{ steps.validate.outputs.artifact-name }}
         ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
         ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
-        GCS_SKIPPED: ${{ steps.validate.outputs.github-code-scanning-skipped }}
+        GCS_SKIPPED: ${{ steps.upload.outcome == 'failure' && steps.upload.conclusion == 'success' }}
         SONARQUBE_SKIPPED: ${{ steps.validate.outputs.sonarqube-skipped }}
       run: bash "${GITHUB_ACTION_PATH//\\//}/scripts/report.sh"

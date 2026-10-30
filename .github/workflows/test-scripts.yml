@@ -97,3 +97,85 @@ jobs:
           [ -z "$(platform_form_problem test/toml/mixed.toml mixed)" ]
           platform_form_problem test/toml/inline-array.toml inline | grep -q 'such as an array of inline tables'
           platform_form_problem test/toml/multiline-string.toml multiline | grep -q 'without breaking the file'
+
+  # validate.sh tells restricted runs, those with a read-only GITHUB_TOKEN and no secrets, from the
+  # event, the actor and the event file. Each case fakes them as GitHub sets them for that run.
+  restricted-runs:
+    name: Restricted runs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check the uploads kept for each kind of run
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$1"; exit 1; }
+          # Usage: check NAME EVENT ACTOR HEAD-REPO PLATFORMS PLATFORM-CONFIG OUTPUT...
+          # An empty HEAD-REPO leaves pull_request out of the event file, as on a push.
+          check() {
+            local name="$1" event="$2" actor="$3" head="$4" platforms="$5" config="$6"
+            shift 6
+            local work="$RUNNER_TEMP/restricted-runs/$name" expected
+            mkdir -p "$work"
+            jq -n --arg head "$head" '{repository: {full_name: "owner/repo"}}
+              + if $head == "" then {} else {pull_request: {head: {repo: {full_name: $head}}}} end' \
+              > "$work/event.json"
+            : > "$work/output.txt"
+            # The commands go to a file, so that the warnings do not annotate this job.
+            GITHUB_EVENT_NAME="$event" GITHUB_ACTOR="$actor" GITHUB_EVENT_PATH="$work/event.json" \
+              GITHUB_OUTPUT="$work/output.txt" PLATFORMS="$platforms" PLATFORM_CONFIG="$config" \
+              CATEGORY="$name" bash scripts/validate.sh > "$work/stdout.txt" \
+              || fail "$name: validate.sh failed: $(cat "$work/stdout.txt")"
+            for expected in "$@"; do
+              grep -qxF "$expected" "$work/output.txt" \
+                || fail "$name: expected $expected, got $(grep -E '^(github-code-scanning|restricted|sonarqube)' "$work/output.txt" | paste -sd ' ')"
+            done
+            echo "$name: ok"
+          }
+
+          # Every run tries the upload. Restricted runs on events other than pull_request let it fail,
+          # and report it as skipped.
+          RESTRICTED=(github-code-scanning=true restricted=true)
+          TRUSTED=(github-code-scanning=true restricted=false)
+          check fork-pr pull_request contributor contributor/repo github-code-scanning '' "${RESTRICTED[@]}"
+          check fork-pr-review pull_request_review contributor contributor/repo github-code-scanning '' "${RESTRICTED[@]}"
+          check fork-pr-review-comment pull_request_review_comment contributor contributor/repo github-code-scanning '' "${RESTRICTED[@]}"
+          check dependabot-pr pull_request 'dependabot[bot]' owner/repo github-code-scanning '' "${RESTRICTED[@]}"
+          check dependabot-push push 'dependabot[bot]' '' github-code-scanning '' "${RESTRICTED[@]}"
+          check dependabot-schedule schedule 'dependabot[bot]' '' github-code-scanning '' "${RESTRICTED[@]}"
+          check dependabot-dispatch workflow_dispatch 'dependabot[bot]' '' github-code-scanning '' "${RESTRICTED[@]}"
+          check same-repo-pr pull_request owner owner/repo github-code-scanning '' "${TRUSTED[@]}"
+          check fork-pr-target pull_request_target contributor contributor/repo github-code-scanning '' "${TRUSTED[@]}"
+
+          # validate.sh no longer warns about the upload; report.sh does, only when it was skipped.
+          for name in fork-pr fork-pr-review fork-pr-review-comment dependabot-pr dependabot-push \
+            dependabot-schedule dependabot-dispatch same-repo-pr fork-pr-target; do
+            ! grep -q '^::warning' "$RUNNER_TEMP/restricted-runs/$name/stdout.txt" \
+              || fail "$name: validate.sh warned: $(grep '^::warning' "$RUNNER_TEMP/restricted-runs/$name/stdout.txt")"
+          done
+
+          # Pull requests from forks still get no secrets, so an empty SonarQube token skips it.
+          SONAR_EMPTY_TOKEN=$'sonarqube:\n  host-url: https://sonar.example.com\n  token: ""'
+          check fork-pr-sonarqube pull_request contributor contributor/repo sonarqube "$SONAR_EMPTY_TOKEN" \
+            sonarqube=false sonarqube-skipped=true
+
+      - name: Check the warning for a skipped upload to code scanning
+        shell: bash
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$1"; exit 1; }
+          WORK="$RUNNER_TEMP/gcs-skipped"
+          mkdir -p "$WORK"
+          # The commands go to a file, so that the warning does not annotate this job.
+          for skipped in true false; do
+            GITHUB_OUTPUT=/dev/null GITHUB_STEP_SUMMARY="$WORK/summary-$skipped.md" CATEGORY=gcs-skipped \
+              UNIT_COUNT=1 HIGH=0 MEDIUM=0 LOW=0 TOTAL=0 PACKAGES_SCANNED=1 GCS_SKIPPED="$skipped" \
+              bash scripts/report.sh > "$WORK/stdout-$skipped.txt"
+          done
+          grep -q '^::warning.*upload to GitHub code scanning failed and was skipped' "$WORK/stdout-true.txt" \
+            || fail "No warning when the upload was skipped"
+          grep -q 'upload to GitHub code scanning failed and was skipped' "$WORK/summary-true.md" \
+            || fail "No summary line when the upload was skipped"
+          ! grep -q 'code scanning' "$WORK/stdout-false.txt" || fail "Warned although the upload was not skipped"
+          ! grep -q 'code scanning' "$WORK/summary-false.md" || fail "Summary mentions code scanning although the upload was not skipped"

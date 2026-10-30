@@ -213,7 +213,7 @@ The platform plugin is published to GitHub Packages, which needs a token with `r
 
 The action passes the settings to SonarScanner through the `SONAR_HOST_URL`, `SONAR_TOKEN` and `SONAR_SCANNER_JSON_PARAMS` environment variables of each package's `bal scan` process, never on the command line. SonarScanner gives them precedence over the properties file, and keeps the file's other settings.
 
-Pull requests from forks in `pull_request` runs, and runs triggered by Dependabot on any event other than `pull_request_target` and `workflow_run`, get no secrets and a read-only `GITHUB_TOKEN`. In such a run, the action skips SonarQube with a warning when a token is empty, skips the upload to code scanning with a warning, and still produces the SARIF file. Save it with `artifacts: true` and upload it from a trusted `workflow_run` workflow.
+Runs for pull requests from forks, such as `pull_request` and `pull_request_review` runs, get no secrets. Runs triggered by Dependabot on any event other than `pull_request_target` and `workflow_run` get only Dependabot secrets, not Actions secrets, so store the SonarQube token as a Dependabot secret too to analyze them. Fork runs get a read-only `GITHUB_TOKEN`. Dependabot runs get a read-only `GITHUB_TOKEN` by default, and a workflow can grant `security-events: write` through the `permissions` key. In such a run, the action skips SonarQube with a warning when a token is empty, and still produces the SARIF file. The action still tries the upload to code scanning, which accepts uploads with a read-only token from `pull_request` runs, and from other runs whose token can write security events. When the upload fails in such a run on an event other than `pull_request`, the action reports it as skipped with a warning instead of failing. In a `pull_request` run, a failed upload fails the step, since it is not caused by the read-only token. Save the SARIF file with `artifacts: true` and upload it from a trusted `workflow_run` workflow.
 
 SonarQube receives each package's findings before the `exclude-tests` and `exclude-paths` filters are applied. Use `sonar.exclusions` and `sonar.test.inclusions` to keep the same files out of SonarQube.
 
@@ -292,11 +292,12 @@ Findings never fail the step unless you set `fail-on-severity`. Problems with th
 | `bal scan` fails for a package | The other packages are still scanned, then the step fails without a SARIF file |
 | SonarQube is unreachable or rejects the analysis of a package | The other packages are still scanned, the SARIF file is produced and sent to the other platforms, then the step fails with result `error` |
 | A package reads its `Scan.toml` from a non-`https` URL, an `https` URL that cannot be downloaded, or a missing file, or has a `[scan]` table without `configPath`, with any platforms | Fails after packages are found, before the tools are downloaded. See [`Scan.toml`](#scantoml) |
-| Upload to code scanning fails | Fails, after the SARIF file is written |
+| Upload to code scanning fails | Fails, after the SARIF file is written. In a run for a pull request from a fork, or triggered by Dependabot, on any event other than `pull_request`, `pull_request_target` and `workflow_run`, passes with a warning instead |
 | Saving the artifact fails, such as when another scan in the run used the same `category` | Fails, after the findings are uploaded |
 | Findings over the gate | Fails, after the SARIF file is written and uploaded |
 | Fork or Dependabot pull request with an empty SonarQube token | Skips SonarQube with a warning, and still produces the SARIF file |
-| Fork or Dependabot pull request with `github-code-scanning` | Skips the upload with a warning, and keeps the SARIF file as the `sarif-file` output and in the artifact, when `artifacts` is `true` |
+| `pull_request` run for a fork or Dependabot pull request, with `github-code-scanning` | Uploads the SARIF file, since code scanning accepts uploads from `pull_request` runs with a read-only token |
+| Fork run on another pull request event, such as `pull_request_review`, or Dependabot run on another event, such as `push`, with `github-code-scanning` | Uploads the SARIF file when the token can write security events. Otherwise skips the upload with a warning, and keeps the SARIF file as the `sarif-file` output and in the artifact, when `artifacts` is `true` |
 
 ## How it works
 
@@ -330,7 +331,7 @@ The action runs on GitHub-hosted Ubuntu, macOS and Windows runners, where it use
 - `setup-ballerina`, `upload-sarif` and `upload-artifact` are pinned by full commit SHA, which Dependabot keeps up to date. The scan tool is the latest version compatible with the Ballerina version unless `tool-version` pins one. `yq`, when the runner has none, the SonarQube platform plugin and the SonarScanner CLI are downloaded at versions this release knows, and their SHA-256 is verified. A `plugin-version` this release has no checksum for, and a plugin given as an `https` URL, are downloaded with a warning, since they cannot be verified.
 - Inputs reach the scripts as environment variables and are never interpolated into scripts.
 - Every `token` in `platform-config`, at the platform level and under each `packages` item, is masked, and `platform-config` is never printed. Each package's token goes to that package's scan only.
-- The action needs only `contents: read`. With `github-code-scanning`, it also needs `security-events: write`, and `actions: read` in private repositories. With `sonarqube` and the default plugin, it also needs `packages: read`.
+- The action needs only `contents: read`. With `github-code-scanning`, it also needs `security-events: write`, and `actions: read` in private repositories. Runs for pull requests from forks never get `security-events: write`, but code scanning still accepts their uploads from `pull_request` runs. See [Failure behaviour](#failure-behaviour). With `sonarqube` and the default plugin, it also needs `packages: read`.
 
 ## License
 
