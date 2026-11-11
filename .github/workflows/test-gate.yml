@@ -11,7 +11,7 @@ jobs:
     name: Fail on medium severity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan a package with low findings only
         id: low
@@ -61,7 +61,7 @@ jobs:
     name: Max findings without a severity gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # The gate is off, so max-findings has no effect even though there are more findings.
       - name: Scan
@@ -91,7 +91,7 @@ jobs:
     name: Fail on severity with max findings
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Count the findings
         id: baseline
