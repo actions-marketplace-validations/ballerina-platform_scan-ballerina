@@ -11,7 +11,7 @@ jobs:
     name: Two categories in one job
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan orders
         id: orders
@@ -60,7 +60,7 @@ jobs:
     name: Annotations
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan with annotations
         id: annotated
@@ -86,7 +86,7 @@ jobs:
     name: Job summary turned off
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       # A control, so that the check below also shows that the summary files can be read.
       - name: Scan with a job summary
@@ -124,7 +124,7 @@ jobs:
     name: SARIF file saved as an artifact
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Scan and save the SARIF file
         id: saved
