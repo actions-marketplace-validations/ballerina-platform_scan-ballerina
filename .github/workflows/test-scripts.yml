@@ -14,7 +14,7 @@ jobs:
     name: Annotation commands
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Write the annotations and compare with the golden file
         shell: bash
@@ -37,7 +37,7 @@ jobs:
     name: SARIF merging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Merge the reports and compare with the golden files
         shell: bash
@@ -142,7 +142,7 @@ jobs:
     name: Alert dismissal
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check the alerts picked for each kind of result
         shell: bash
@@ -214,7 +214,7 @@ jobs:
     name: Removed suppressions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check the warnings of removed suppressions on a pull request
         shell: bash
@@ -412,7 +412,7 @@ jobs:
     name: Pull request comments
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check the replies and comments created, updated and left alone
         shell: bash
@@ -635,7 +635,7 @@ jobs:
     name: Scan tool support
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check the supported scan tools
         shell: bash
@@ -816,7 +816,7 @@ jobs:
     name: SonarScanner cache pruning
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check that only unread plugin folders are dropped
         shell: bash
@@ -903,7 +903,7 @@ jobs:
     name: Scan.toml editing
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Compare with the golden files
         shell: bash
@@ -944,7 +944,7 @@ jobs:
     name: Restricted runs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7.0.1
 
       - name: Check the uploads kept for each kind of run
         shell: bash
